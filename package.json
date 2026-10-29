@@ -1,0 +1,22 @@
+{
+  "name": "katta-lab",
+  "version": "1.0.0",
+  "description": "KATTA: an agent-based laboratory of third places. Build a city, watch belonging form, run paired Monte Carlo experiments.",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "author": "Shriya Shekatkar",
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.1",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.9"
+  }
+}

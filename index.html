@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KATTA · a laboratory of third places</title>
+  <meta name="description" content="An agent-based laboratory of third places: build a city of kattas, chai tapris and reading rooms, watch synthetic residents form ties, and run paired Monte Carlo experiments." />
+  <meta name="theme-color" content="#F3ECE0" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%232B1E18'/%3E%3Crect x='6' y='17' width='20' height='5' fill='%23B08D57'/%3E%3Ccircle cx='11' cy='12' r='3' fill='%23E9C9C3'/%3E%3Ccircle cx='21' cy='12' r='3' fill='%23E9C9C3'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400..700&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..900,0..100,0..1;1,9..144,300..900,0..100,0..1&family=Tiro+Devanagari+Marathi:ital@0;1&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <a class="skip" href="#lab">Skip to the lab</a>
+
+  <header class="masthead">
+    <div class="mast-rule">
+      <span>Field edition · Nº 002</span>
+      <span class="hide-sm">A laboratory of third places</span>
+      <span id="dateline">Evening 0</span>
+    </div>
+    <h1 class="mast-title">
+      <span class="mast-word">Katta</span>
+      <span class="mast-deva" lang="mr">कट्टा</span>
+    </h1>
+    <div class="mast-row">
+    <p class="mast-dek">
+      <span class="dropcap">W</span>here do strangers become regulars? Build a city of chai tapris, roadside kattas,
+      reading rooms and maidans. Release a few hundred <em>synthetic</em> residents into its evenings. Watch belonging
+      form, or fail to, and then test it: the lab runs paired Monte Carlo experiments in your browser.
+    </p>
+    <aside class="mast-box" aria-label="Tonight in the city">
+      <p class="mast-box-head">Tonight in the city <span class="tag">synthetic</span></p>
+      <dl>
+        <div><dt>Out</dt><dd id="mb-out">—</dd></div>
+        <div><dt>Places</dt><dd id="mb-places">—</dd></div>
+        <div><dt>Ties</dt><dd id="mb-ties">—</dd></div>
+        <div><dt>Alone</dt><dd id="mb-alone">—</dd></div>
+      </dl>
+    </aside>
+    </div>
+    <nav class="mast-nav" aria-label="Sections">
+      <a href="#lab">I. The city</a>
+      <a href="#experiment">II. The experiment</a>
+      <a href="#method">III. The method</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="lab" class="lab" aria-label="The simulated city">
+      <!-- LEVERS -->
+      <section class="col levers" aria-labelledby="levers-h">
+        <h2 id="levers-h" class="kicker">The levers</h2>
+
+        <label class="field">
+          <span class="field-label">Scenario</span>
+          <select id="preset">
+            <option value="peth">Peth evenings</option>
+            <option value="closure">Traffic took the kattas</option>
+            <option value="township">Satellite township</option>
+            <option value="blank">Blank city</option>
+          </select>
+        </label>
+        <p id="preset-dek" class="small muted"></p>
+
+        <div class="transport" role="group" aria-label="Playback">
+          <button id="play" class="btn btn-ink" aria-pressed="false">Play</button>
+          <button id="step" class="btn">+1 evening</button>
+          <button id="skip" class="btn">+10</button>
+          <button id="reset" class="btn btn-ghost" title="Restart the city with the current seed">Restart</button>
+        </div>
+        <label class="field">
+          <span class="field-label">Pace <output id="pace-out"></output></span>
+          <input id="pace" type="range" min="1" max="12" step="1" value="5" aria-describedby="pace-help" />
+          <span id="pace-help" class="small muted">seconds per evening</span>
+        </label>
+
+        <fieldset class="params">
+          <legend class="kicker">The people <span class="tag">synthetic</span></legend>
+          <div id="param-sliders"></div>
+          <label class="field field-inline">
+            <span class="field-label">Seed</span>
+            <input id="seed" type="number" min="1" max="999999" step="1" inputmode="numeric" />
+            <button id="reseed" class="btn btn-small" title="New random seed">Shuffle</button>
+          </label>
+          <p class="small muted">Population and housing changes restart the city. Other levers apply live.</p>
+        </fieldset>
+
+        <fieldset class="params">
+          <legend class="kicker">Your cities</legend>
+          <div class="field-inline">
+            <input id="save-name" type="text" maxlength="40" placeholder="Name this city" aria-label="Name for saved city" />
+            <button id="save" class="btn btn-small">Save</button>
+          </div>
+          <ul id="saved" class="saved" aria-live="polite"></ul>
+          <p id="storage-note" class="small muted" hidden>Storage is unavailable in this browser, so saved cities last only until you close the tab.</p>
+        </fieldset>
+      </section>
+
+      <!-- STAGE -->
+      <section class="col stage" aria-labelledby="stage-h">
+        <div class="stage-head">
+          <h2 id="stage-h" class="kicker">The city at dusk</h2>
+          <div class="tabs" role="tablist" aria-label="View">
+            <button role="tab" id="tab-map" aria-selected="true" aria-controls="canvas-wrap">Map</button>
+            <button role="tab" id="tab-web" aria-selected="false" aria-controls="canvas-wrap">Web of ties</button>
+          </div>
+        </div>
+
+        <div class="toolbar" role="toolbar" aria-label="Map tools">
+          <button class="tool" data-tool="inspect" aria-pressed="true">Inspect</button>
+          <span class="tool-sep" aria-hidden="true">Add</span>
+          <span id="add-tools" class="add-tools"></span>
+          <button class="tool" data-tool="remove" aria-pressed="false">Remove</button>
+        </div>
+
+        <div id="canvas-wrap" class="canvas-wrap" role="tabpanel" aria-labelledby="tab-map">
+          <canvas id="city" tabindex="0" aria-label="Map of the synthetic city. Use Tab to focus, then arrow keys to move the selected place."></canvas>
+          <div id="clock" class="clock" aria-hidden="true">
+            <svg viewBox="0 0 40 40" width="34" height="34"><circle cx="20" cy="20" r="17" class="clock-ring"/><path id="moon" class="moon" d=""/></svg>
+            <span id="clock-label">Dusk</span>
+          </div>
+          <div id="empty" class="empty" hidden>
+            <p class="empty-title">No third places yet.</p>
+            <p>Pick a place type from <strong>Add</strong> above, then click anywhere on the map. Residents will start going out on the next evening.</p>
+          </div>
+          <div id="tooltip" class="tooltip" role="status" hidden></div>
+          <button id="play-overlay" class="play-overlay" aria-label="Play the evenings" title="Play / pause (Space)"><span aria-hidden="true">▶</span></button>
+        </div>
+        <div class="legend" aria-label="Legend">
+          <span><i class="dot dot-res"></i>Long-time residents</span>
+          <span><i class="dot dot-new"></i>Newcomers</span>
+          <span><i class="ring"></i>Place · ring shows tonight's crowd vs. capacity</span>
+          <label class="legend-toggle"><input id="trails" type="checkbox" checked /> Desire lines</label>
+        </div>
+        <p class="caption">
+          Every dot is a synthetic person who walks, as the crow flies, from home to tonight's place and back.
+          Repeated walks leave <em>desire lines</em>. Ties form only between people who are in the same place on the same evening.
+        </p>
+        <h3 class="kicker kicker-sm" id="ledger-h">Tonight's ledger</h3>
+        <div class="ledger-wrap">
+          <table class="ledger" aria-labelledby="ledger-h">
+            <thead><tr><th scope="col">Place</th><th scope="col">Crowd · capacity</th><th scope="col" class="num">Newcomers</th><th scope="col" class="num">Regulars</th></tr></thead>
+            <tbody id="ledger"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- NOTEBOOK -->
+      <aside class="col notebook" aria-labelledby="nb-h">
+        <h2 id="nb-h" class="kicker">The field notebook</h2>
+        <div id="metrics" class="metrics" aria-live="off"></div>
+        <div id="inspector" class="inspector" aria-live="polite"></div>
+        <h3 class="kicker kicker-sm">Ethnographer's notes</h3>
+        <ol id="notes" class="notes" aria-live="polite"></ol>
+      </aside>
+    </section>
+
+    <!-- EXPERIMENT -->
+    <section id="experiment" class="experiment" aria-labelledby="exp-h">
+      <header class="sec-head">
+        <p class="sec-num">II.</p>
+        <h2 id="exp-h">The experiment</h2>
+        <p class="sec-dek">One run of a city is an anecdote. Here the lab replays two versions of the city many times,
+          each pair on the same random seed, and reports how much the change moved each outcome, with a 95% bootstrap interval.</p>
+      </header>
+
+      <div class="exp-grid">
+        <div class="arm" id="arm-a">
+          <p class="arm-letter">A</p>
+          <p class="arm-name" id="a-name">Not set</p>
+          <p class="arm-meta small muted" id="a-meta"></p>
+          <button id="set-a" class="btn">Use the current city as A</button>
+        </div>
+        <div class="arm" id="arm-b">
+          <p class="arm-letter">B</p>
+          <p class="arm-name" id="b-name">Not set</p>
+          <p class="arm-meta small muted" id="b-meta"></p>
+          <button id="set-b" class="btn">Use the current city as B</button>
+          <div class="variants" role="group" aria-label="Quick variants of A">
+            <span class="small muted">or derive B from A:</span>
+            <button class="btn btn-small" data-variant="close-busiest">Close A's busiest place</button>
+            <button class="btn btn-small" data-variant="halve-prices">Halve every price</button>
+            <button class="btn btn-small" data-variant="central-katta">Add a central katta</button>
+            <button class="btn btn-small" data-variant="mix-housing">Mix the housing</button>
+          </div>
+        </div>
+        <div class="arm arm-run">
+          <label class="field">
+            <span class="field-label">Replicates per arm</span>
+            <select id="reps"><option>12</option><option selected>24</option><option>48</option></select>
+          </label>
+          <label class="field">
+            <span class="field-label">Evenings per run</span>
+            <select id="days"><option>30</option><option selected>60</option><option>90</option></select>
+          </label>
+          <button id="run" class="btn btn-ink btn-wide" disabled>Run experiment</button>
+          <div class="progress" aria-hidden="true"><div id="progress-bar"></div></div>
+          <p id="run-status" class="small muted" role="status">Set A and B to begin.</p>
+        </div>
+      </div>
+
+      <div id="results" class="results" aria-live="polite"></div>
+      <div class="results-foot">
+        <button id="csv" class="btn btn-small" disabled>Download results (CSV)</button>
+        <p class="small muted">Results describe the model, not any real city or population.</p>
+      </div>
+    </section>
+
+    <!-- METHOD -->
+    <section id="method" class="method" aria-labelledby="method-h">
+      <header class="sec-head">
+        <p class="sec-num">III.</p>
+        <h2 id="method-h">The method</h2>
+        <p class="sec-dek">Every number on this page comes from a small, inspectable model. Here is all of it.</p>
+      </header>
+      <div class="method-cols">
+        <article>
+          <h3>Why a katta</h3>
+          <p>The sociologist Ray Oldenburg called them <em>third places</em>: not home, not work, but somewhere you can drop
+            in without an invitation, that costs little, is close by, has regulars, and where talk is the main activity.
+            In Pune the word for one is <span lang="mr" class="deva">कट्टा</span>, a roadside ledge where people sat and
+            argued for decades, and which road traffic has largely erased. This lab asks what is lost, and for whom, when such places go.</p>
+          <h3>The people</h3>
+          <p>Two synthetic groups: <strong>long-time residents</strong>, housed mostly in the inner quarters and arriving
+            with ties to three neighbours, and <strong>newcomers</strong>, housed mostly at the edges and arriving with nobody.
+            Each person has a budget and a sociability, drawn from clipped normals. None of this is calibrated to real data.</p>
+          <h3>An evening</h3>
+          <p>Each person goes out with probability equal to their sociability, then picks a place, or home, by a
+            multinomial logit. The utility of place <var>j</var> is</p>
+          <pre class="eq">U = −β<sub>d</sub>·d/250 − 3β<sub>p</sub>·price·(1−budget) + 1.2·conv
+  + 0.9·ln(1+habit) + 0.6·min(3, friends there)
+  + 2β<sub>h</sub>·(share like me − ½) − 2.5·max(0, crowd/cap − 0.85)</pre>
+          <p>with staying home worth 0.4. Crowd size and composition are a place's <em>reputation</em>, an exponential
+            moving average of past evenings, which stops the whole city stampeding to yesterday's empty room.</p>
+        </article>
+        <article>
+          <h3>Ties</h3>
+          <p>At each place, every attendee holds 1 + ⌊4 · sociability · conv⌋ conversations with random others there.
+            A conversation updates tie strength <var>s ← s + g(1 − s)</var>, with <var>g = 0.22·conv</var> for people of the same group
+            and <var>g = 0.22·conv·(1 − friction)</var> across groups. Overcrowding dilutes conviviality by capacity / crowd.
+            Ties decay by 3.5% a night; habits by 5%.</p>
+          <h3>Measures</h3>
+          <p><strong>Belonging</strong> per person is <var>1 − exp(−(0.55·strong + 0.18·weak + 0.06·attachment))</var>:
+            close ties matter most, acquaintances a little, being a regular somewhere a little more.
+            <strong>Mixing</strong> is the share of ties that cross groups divided by 2p(1−p), the share expected by chance.
+            The <strong>dissimilarity index</strong> asks what share of one group would have to switch places for both to be spread alike.
+            <strong>Clustering</strong> is the average local clustering coefficient of the tie network.</p>
+          <h3>Experiments</h3>
+          <p>Replicate <var>k</var> of A and of B use the same seed: the same people, the same coin flips where the
+            scenarios agree. This is <em>common random numbers</em>, a classic Monte Carlo variance-reduction trick. Outcomes are
+            averaged over each run's last ten evenings, and the paired differences are resampled 2,000 times for a percentile interval.</p>
+          <h3>What this is not</h3>
+          <p>Not a forecast, not a measurement of any real neighbourhood, and not a claim about any real group. It is a
+            thinking tool for asking which design choices plausibly matter, and for seeing how strongly the answer depends on assumptions you can change.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Original work by Shriya Shekatkar · SHRIYA.EXE · Synthetic or demo data is labeled as such. Not affiliated with any film, studio or company.</p>
+    <p><a href="https://shriyashekatkar25-byte.github.io/shriya-exe/">The SHRIYA.EXE studio gallery</a> · <a href="https://github.com/shriyashekatkar25-byte/katta-lab">Source on GitHub</a></p>
+  </footer>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
