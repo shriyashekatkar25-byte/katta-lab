@@ -1,92 +1,93 @@
-# KATTA — case study
+# KATTA · case study
 
 ## The question
 
-Cities keep removing the cheap, informal places where people who are not yet friends see each other often enough to become friends: the katta lost to a widened road, the tea stall cleared for parking, the reading room with shorter hours. Planners and product teams talk about "community" and "belonging", but rarely have a way to *reason* about which design choices plausibly matter, for whom, and how sure we can be. KATTA is an artistic and analytical question turned into a tool: **if you change the places a city offers, how does belonging change, and does it change equally for people who just arrived?**
+Cities talk about "community spaces" as if every new café, library or riverfront were the same kind of good. Sociology says otherwise: places produce **bonding** ties (within a group) and **bridging** ties (across groups) in different proportions, and people sort themselves into places by taste, price, distance and the company they expect to find. What happens when you add, price or close one place is a property of the whole system, not of the place.
 
-## The user
+KATTA turns that into something you can poke: a synthetic city whose evenings you can change and whose consequences you can measure with paired experiments.
 
-- **Students and teachers of sociology, urban studies and statistics**, who want an inspectable model of social ties forming through co-presence rather than a black-box chart.
-- **Product and civic designers** who think about "third places" (community features, co-working, libraries, public space) and need a sandbox for intuition before they reach for real data.
-- **Curious readers** of interactive journalism who will not read a paper but will drag a tea stall across a map.
+## Who it is for
 
-## The need
+- **Students and teachers of urban/computational sociology** who want an inspectable model of Oldenburg's third places, homophily and Putnam's bonding vs. bridging distinction.
+- **Civic designers and product people** who need intuition for second-order effects before arguing for an intervention.
+- **Interview readers of this portfolio**: it shows modelling, statistics, rendering and product judgement in one artefact.
 
-A way to (1) build and see a social system, (2) change one thing at a time, and (3) tell signal from noise. Most "agent-based model" demos stop at (1); most statistics teaching stops at (3) with no system worth caring about.
+## Need
+
+Existing agent-based teaching tools (NetLogo's Schelling segregation and similar) are excellent but austere, rarely about *leisure* places, and seldom pair the model with honest experimental statistics. Policy discussions, meanwhile, often treat a single run or a single anecdote as evidence.
 
 ## Value proposition
 
-A city you can edit in seconds, people you can click on, and an experiment harness that answers "did that change matter?" with an honest interval, all in a browser tab with no install.
+A model you can see, change and test in one page: watch it, intervene, and get a paired Monte Carlo answer with intervals, effect sizes and plain-language notes that never overclaim.
 
 ## Differentiation
 
-- **Editorial, not a dashboard.** It reads like a broadsheet field report: masthead, ledger, ethnographer's notes, method section. The interface is the argument.
-- **The model is fully visible.** The method section contains every equation the code runs; the unit tests pin down the behaviour.
-- **Experiments use common random numbers.** Replicate *k* of A and B share a seed, so the same synthetic people make the same coin flips wherever the scenarios agree. This is a real Monte Carlo variance-reduction technique, rarely shown in teaching tools, and it makes small effects detectable with few replicates.
-- **Culturally specific without costume.** The katta is a researched Pune institution, used because it is the clearest real-world example of Oldenburg's third place, not as decoration.
+1. **Paired experiments by design.** A and B share seeds (common random numbers), so differences come from the change, not from luck. An A/A test returns exactly zero.
+2. **Outcomes that disagree.** Six measures with explicit "better" directions, so trade-offs (more belonging, less bridging) are visible rather than averaged away.
+3. **A narrator you can audit.** Field notes are rule-based templates keyed to thresholds; no LLM writes claims.
+4. **An editorial interface.** The broadsheet format makes a research tool feel worth reading; the night map makes the model's mechanics visible.
 
 ## Core workflow
 
-1. Pick a scenario (*Peth evenings*) and press Play. Watch people walk out at dusk, crowd the tea stalls, and walk home.
-2. Click a person: see their ties drawn across the city, their belonging, where they are a regular.
-3. Change the city: add a katta between two neighbourhoods, raise a café's price, mix the housing.
-4. Set A = the original, derive B (e.g. "Close A's busiest place"), run 24 paired replicates, read the six interval plots, export CSV.
+Watch a fortnight → open or close a place (map or ledger) → freeze baseline → change something → run 20 × 60 → read verdicts and notes → save to notebook / export.
 
-## Technical moat
+## Technical moat (what was hard)
 
-- A compact, tested agent-based model: multinomial-logit place choice with distance, price × budget, conviviality, habit, friends present, homophily and crowding; tie formation through conversations with saturating updates and cross-group friction; tie and habit decay; place *reputation* as an exponential moving average, which avoids the El Farol stampede between empty and packed rooms.
-- Social measures from the literature: index of dissimilarity, mixing relative to the 2p(1−p) random benchmark, local clustering coefficient, a diminishing-returns belonging index.
-- Paired percentile bootstrap over CRN replicates, in a Web Worker with progress and a main-thread fallback.
-- Hand-written canvas renderer (engraved base map cached offscreen, persistent desire-line layer, adaptive pixel ratio) and a stabilised force layout.
+- A random-utility (multinomial logit) model with feedback: yesterday's composition feeds today's homophily term; yesterday's load feeds crowding. Small changes can tip.
+- Conversation dynamics that make room size matter: random partners with a mild pull to known people, so small rooms build strong ties and large rooms build many weak ones.
+- Statistics implemented from scratch: t-intervals, seeded paired bootstrap, paired Cohen's d, Gini, Duncan's dissimilarity, a cohort-adjusted mixing ratio.
+- A three-layer canvas renderer with additive "light" encoding, phyllotaxis seating, adaptive quality and a reduced-motion path.
+- The experiment loop in a Web Worker so thousands of simulated evenings run without freezing the animation.
 
 ## Creative decisions
 
-- **Desire lines.** Agents walk straight lines because that is the honest abstraction (there is no street routing), and the accumulated paths become the most beautiful part of the picture: a map of where the city actually goes in the evening.
-- **Dusk as the clock.** Third places are evening institutions, so the whole simulation is one evening at a time: a rose wash, then espresso shadow, brass glows at occupied places, and a waxing chandrakor.
-- **Two voices, two shapes.** Residents are oxblood circles, newcomers brass diamonds: distinguishable by shape for colour-blind readers.
-- **Words written by rules.** The notes read like fieldwork, but each sentence is a template filled from the model's numbers. No language model, nothing invented.
+- People as light, cohorts as gold and rose, contact as ivory: the encoding *is* the thesis.
+- Old city as courtyard blocks, new township as a tower grid: geography carries the residential-segregation story without a single word.
+- Marathi used where it is native to the subject (कट्टा, टपरी, वाचनालय, घाट), not as ornament.
+- Luxury Editorial palette and Swiss-grid numbering, deliberately far from drop #001's glossy Y2K desktop.
 
-## Engineering trade-offs and what was excluded
+## Trade-offs and exclusions
 
-- **No street network routing.** It would add realism to travel distances but cost a graph library and obscure the model. Distance is Euclidean.
-- **No LLM.** The notes are deterministic templates on purpose: the lab must never "say" something its numbers do not support.
-- **No real demographic data.** Calibrating to a real city would invite readers to treat outputs as findings about real people. Everything is synthetic and labelled so.
-- **Two groups only.** Real cities have many overlapping identities; two keeps measures interpretable (dissimilarity, 2p(1−p) mixing).
-- **O(n²) layout repulsion.** Fine up to the 600-person cap; Barnes–Hut was not worth the code for this size.
+- **No real data.** Calibrating to a real city would require survey data I do not have and would invite misreading the toy as a finding. Every screen says "synthetic".
+- **Two cohorts only.** Real belonging is multi-dimensional (age, gender, class, language, faith). Two groups keep the measures interpretable.
+- **No LLM.** Fluency was traded for traceability.
+- **No framework.** A few panels re-rendered from state did not justify React's weight.
+- **Taste parameters are assumptions** (settled residents lean to the tapri, newcomers to the café), exposed in code and in the method section rather than hidden.
 
-## Statistical and modelling logic
+## Statistical logic
 
-- Choice: `P(j) = exp(U_j) / (exp(U_home) + Σ_k exp(U_k))`. Equivalent to adding i.i.d. Gumbel noise to each utility and taking the argmax (tested by simulation against the softmax).
-- Ties: `s ← s + g(1 − s)` per conversation, `g = 0.22·conv·(1 − friction if cross-group)`; nightly decay `s ← 0.965·s`; ties under 0.03 are forgotten.
-- Belonging: `B = 1 − exp(−(0.55·strong + 0.18·weak + 0.06·attachment))`.
-- Experiment: outcomes averaged over each run's last 10 evenings; paired differences `d_k = B_k − A_k` resampled 2,000 times; percentile 95% interval; share of resampled means above zero reported as directional agreement.
-- An example of what the lab produces (model output, not a finding about any real place): in the default *Peth evenings* city, closing its busiest place (the reading room) in a 12-replicate × 30-evening run lowered mean belonging by 0.017, interval [−0.025, −0.009], and raised the share of people with no ties by 0.017. A counter-intuitive pattern the model often shows: removing places can *raise* cross-group mixing while lowering belonging, because the remaining rooms force people to share.
+- Choice: `P(j) ∝ exp(U_j / T)` over open places plus home (`U_home = 0.4`).
+- Ties: +1 per conversation, ×(1 − decay) per evening, dropped below 0.1; strong at ≥ 2.5.
+- Belonging: `1 − exp(−Σ v²/(v²+4) / 5)`, a saturating function that weights regular ties over passing hellos.
+- Experiments: per world, the mean of the last 10 evenings; A and B paired on seed; B − A via 2,000 bootstrap resamples; verdict only when the 95% interval excludes zero.
 
-## Proposed metrics (if this were deployed)
+## Example insight (from the toy)
 
-None of these have been measured; they are what I would instrument.
+Opening a café at Ferry Landing, 20 paired worlds × 60 evenings: belonging +1.6 pts [+1.3, +1.9], isolation −7.0 pts [−8.0, −5.9], bridging ties −2.6 pts [−3.9, −1.3], place segregation +7.8 pts [+5.8, +9.9]. One more choice made sorting easier. That is a hypothesis-generating pattern, not evidence about any city.
 
-- Activation: share of visitors who run at least one experiment.
-- Depth: median number of city edits before the first experiment.
-- Comprehension: in a classroom setting, pre/post accuracy on "which change reduces the newcomer gap?" questions.
-- Trust: share of experiment results downloaded as CSV (signals people want to check the numbers).
+## Proposed metrics (if this were a product)
+
+No usage numbers exist; these are what I would instrument:
+- Experiments run per session, and share that are A/A sanity checks (are people learning to trust the bench?).
+- Share of users who change ≥ 2 interventions before running (exploration depth).
+- Notebook saves and exports per experiment (is the output worth keeping?).
+- Time from first visit to first experiment (onboarding friction).
+- For classroom use: pre/post questions on bonding vs. bridging.
 
 ## Limitations
 
-- Parameters are hand-set for plausibility, not estimated from data; results are qualitative.
-- No time-of-day, weekday or seasonal (monsoon!) variation; one evening is the unit.
-- Groups are defined by tenure only; budgets differ by a fixed synthetic offset.
-- Housing does not respond to places (no gentrification feedback).
-- The belonging index is a design choice, not a validated psychometric scale.
+- Not calibrated; magnitudes are meaningless outside the model.
+- No daytime life, work, schooling, family or online ties.
+- Distance is straight-line; the river crossing has no extra cost.
+- Homophily is a single scalar for both cohorts.
+- 360 residents is small; group sizes at individual places can be noisy.
+- Tested in Chromium only.
 
 ## Roadmap
 
-1. **Monsoon mode:** rain lowers outing rates and favours covered places, a natural Maharashtrian seasonal experiment.
-2. **Sensitivity sweeps:** run an experiment across a grid of homophily values and plot where the effect flips sign.
-3. **Street routing** on the drawn lanes, so a bridge can be a policy lever.
-4. **Shareable scenarios** encoded in the URL.
-5. **Calibration notebook:** a documented, optional path to fit the choice model to survey data, kept separate from the synthetic default.
-
----
-
-Original work by Shriya Shekatkar · SHRIYA.EXE · Synthetic or demo data is labeled as such. Not affiliated with any film, studio or company. Studio gallery: https://shriyashekatkar25-byte.github.io/shriya-exe/
+1. Scenario presets and a guided "three experiments" tour for teaching.
+2. Per-cohort homophily and taste sliders; a third cohort.
+3. Street network with bridge bottlenecks and travel time.
+4. Sensitivity analysis: sweep one parameter, plot the response curve with bands.
+5. Shareable scenario URLs (state in the hash, no server).
+6. Optional calibration mode against user-supplied, consented survey summaries, with the synthetic label replaced by a provenance panel.
