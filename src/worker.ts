@@ -1,24 +1,27 @@
 /// <reference lib="webworker" />
-/** Runs Monte Carlo experiments off the main thread so the city keeps animating. */
-import { runExperiment } from './lib/experiment';
-import type { Scenario } from './lib/city';
+/**
+ * Experiment worker: runs the paired Monte Carlo off the main thread so the
+ * city keeps animating while hundreds of synthetic evenings are simulated.
+ */
+import { runExperiment, type Scenario } from './lib/experiment';
 
-interface Job {
-  a: Scenario;
-  b: Scenario;
-  reps: number;
+export interface ExperimentRequest {
+  id: number;
+  A: Scenario;
+  B: Scenario;
+  runs: number;
   days: number;
-  seed: number;
+  baseSeed: number;
 }
 
-self.onmessage = (e: MessageEvent<Job>) => {
+const post = (msg: unknown) => (self as unknown as Worker).postMessage(msg);
+
+self.onmessage = (e: MessageEvent<ExperimentRequest>) => {
+  const { id, A, B, runs, days, baseSeed } = e.data;
   try {
-    const { a, b, reps, days, seed } = e.data;
-    const result = runExperiment(a, b, reps, days, seed, (done, total) => {
-      self.postMessage({ type: 'progress', done, total });
-    });
-    self.postMessage({ type: 'done', result });
+    const result = runExperiment(A, B, runs, days, baseSeed, (done, total) => post({ id, type: 'progress', done, total }));
+    post({ id, type: 'done', result });
   } catch (err) {
-    self.postMessage({ type: 'error', message: String(err) });
+    post({ id, type: 'error', message: String(err) });
   }
 };
