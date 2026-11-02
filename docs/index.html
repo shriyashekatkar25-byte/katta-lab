@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>KATTA · a field laboratory for third places</title>
+    <meta name="description" content="An agent-based laboratory: a synthetic city's evenings, its chai stalls, reading rooms, ghats, cinemas and cafés, and who comes to belong. Original work by Shriya Shekatkar." />
+    <meta name="theme-color" content="#F4ECDF" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%237A1F2B'/%3E%3Cpath d='M6 13 L16 7 L26 13 Z M8 13 V24 M24 13 V24 M6 24 H26' stroke='%23F4ECDF' stroke-width='2' fill='none' stroke-linejoin='round'/%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&family=Tiro+Devanagari+Marathi:ital@0;1&display=swap" rel="stylesheet" />
+    <script type="module" crossorigin src="/katta-lab/assets/index-D5EXHPc-.js"></script>
+    <link rel="stylesheet" crossorigin href="/katta-lab/assets/index-BiIjbogb.css">
+  </head>
+  <body>
+    <a class="skip" href="#city">Skip to the city</a>
+    <header class="masthead" id="top">
+      <div class="dateline">
+        <span>SHRIYA.EXE</span><span>Drop 002</span><span>Field laboratory</span><span class="dl-right">Synthetic data · labelled throughout</span>
+      </div>
+      <div class="mast-grid">
+        <h1 class="title"><span class="title-latin">Katta</span><span class="title-deva" lang="mr">कट्टा</span></h1>
+        <div class="mast-side">
+          <p class="kicker">A laboratory for third places</p>
+          <p class="dek">Where does a city spend its evenings, and who ends up meeting whom? Build a small synthetic city of chai stalls, reading rooms, ghats, a single-screen cinema and cafés, watch three hundred and sixty residents choose where to go, and run paired Monte Carlo experiments on what a new place, a price, or the monsoon does to <em>belonging</em>.</p>
+        </div>
+      </div>
+      <aside class="gloss" aria-label="Glossary">
+        <p><b lang="mr">कट्टा</b> <i>katta</i>, n. (Marathi): a raised ledge or platform, and by extension the regular spot where friends gather to talk. Ray Oldenburg called such places <i>third places</i>: neither home (first) nor work (second).</p>
+      </aside>
+    </header>
+
+    <main>
+      <section class="sec" id="city" aria-labelledby="h-city">
+        <div class="sec-head">
+          <span class="num" aria-hidden="true">01</span>
+          <div>
+            <h2 id="h-city">The city, by night</h2>
+            <p class="sec-dek">Gold for <b class="c-settled">settled</b> residents, rose for <b class="c-new">newcomers</b>. Where the two share a room, the light adds up to ivory. Click a place to change it; click a resident to read their ties.</p>
+          </div>
+        </div>
+
+        <div class="city-grid">
+          <figure class="map-wrap">
+            <div class="map-frame">
+              <canvas id="map" role="img" aria-label="Animated map of the synthetic city. A text summary follows in the Tonight panel."></canvas>
+              <div class="map-state" id="mapState" hidden></div>
+            </div>
+            <figcaption class="map-cap">
+              <span id="mapCaption">Evening 0 · dry</span>
+              <span class="cap-right">Render quality: <span id="quality">full</span></span>
+            </figcaption>
+          </figure>
+
+          <aside class="console" aria-label="Simulation controls">
+            <div class="transport" role="group" aria-label="Playback">
+              <button id="play" class="btn btn-primary" aria-pressed="false"><span class="play-ico" aria-hidden="true"></span><span id="playLabel">Play</span></button>
+              <button id="stepBtn" class="btn">Next evening</button>
+              <button id="resetBtn" class="btn btn-ghost" title="Build a new city with a new seed">New city</button>
+            </div>
+            <fieldset class="speed">
+              <legend>Pace</legend>
+              <label><input type="radio" name="speed" value="0.5" /> slow</label>
+              <label><input type="radio" name="speed" value="1" checked /> 1×</label>
+              <label><input type="radio" name="speed" value="4" /> 4×</label>
+              <label><input type="radio" name="speed" value="12" /> 12×</label>
+            </fieldset>
+            <div class="toggles">
+              <label class="switch"><input type="checkbox" id="monsoon" /> <span>Monsoon <i lang="mr">पावसाळा</i></span></label>
+              <label class="switch"><input type="checkbox" id="bridges" checked /> <span>Draw bridging ties</span></label>
+              <label class="switch"><input type="checkbox" id="trails" checked /> <span>Light trails</span></label>
+            </div>
+
+            <div class="tonight" aria-live="polite" id="tonight">
+              <h3>Tonight</h3>
+              <p class="tonight-big"><span id="tDay">0</span><small>evenings</small></p>
+              <p id="tSummary">The city is waiting for its first evening.</p>
+            </div>
+
+            <div class="inspector" id="inspector" aria-live="polite">
+              <h3>Inspector</h3>
+              <p class="muted">Select a place on the map or in the plot ledger, or click a resident.</p>
+            </div>
+          </aside>
+        </div>
+
+        <div class="lower-grid">
+          <section class="plots" aria-labelledby="h-plots">
+            <h3 id="h-plots">Plot ledger <small>· sixteen plots, open or close any</small></h3>
+            <ol id="plotList" class="plot-list"></ol>
+          </section>
+          <section class="tuning" aria-labelledby="h-tune">
+            <h3 id="h-tune">Tune the model <small>· the β weights of the choice equation</small></h3>
+            <div id="sliders" class="sliders"></div>
+            <p class="muted small">Sliders marked <span class="rebuild-mark">⟲</span> rebuild the population (same seed). The rest apply from the next evening.</p>
+          </section>
+        </div>
+      </section>
+
+      <section class="sec" id="ledger" aria-labelledby="h-ledger">
+        <div class="sec-head">
+          <span class="num" aria-hidden="true">02</span>
+          <div>
+            <h2 id="h-ledger">The ledger</h2>
+            <p class="sec-dek">Six measures, recomputed every evening from the simulated ties and visits. Ticks under a line mark rainy evenings.</p>
+          </div>
+        </div>
+        <div class="metrics" id="metrics"></div>
+        <div class="census">
+          <div class="census-text">
+            <h3>Census of belonging</h3>
+            <p>One figure per resident: settled above, newcomers below, each row sorted from most to least belonging. The deeper the fill, the stronger the web of ties; an outlined figure has no strong tie yet.</p>
+            <p class="muted small" id="censusNote"></p>
+          </div>
+          <div class="census-fig" id="census"></div>
+        </div>
+      </section>
+
+      <section class="sec" id="experiment" aria-labelledby="h-exp">
+        <div class="sec-head">
+          <span class="num" aria-hidden="true">03</span>
+          <div>
+            <h2 id="h-exp">The experiment</h2>
+            <p class="sec-dek">Freeze the city as a baseline, change something, then run both versions on the same seeds. Each pair of synthetic worlds shares its residents, homes and dice, so the paired difference isolates your change.</p>
+          </div>
+        </div>
+        <div class="exp-grid">
+          <div class="exp-setup">
+            <ol class="steps">
+              <li><button id="freezeBtn" class="btn">Freeze current city as baseline A</button><p class="muted small" id="baselineNote">Baseline A: the default city (not yet frozen).</p></li>
+              <li><p>Change plots, sliders or the monsoon above. Your current city is <b>B</b>.</p><ul id="diffList" class="diff-list"></ul></li>
+              <li>
+                <div class="exp-opts">
+                  <label>Worlds <select id="runs"><option>10</option><option selected>20</option><option>40</option></select></label>
+                  <label>Evenings each <select id="days"><option>40</option><option selected>60</option><option>90</option></select></label>
+                </div>
+                <button id="runBtn" class="btn btn-primary">Run experiment</button>
+                <div class="progress" id="progress" hidden><div class="bar"><span id="progressBar"></span></div><span id="progressText" aria-live="polite"></span></div>
+              </li>
+            </ol>
+          </div>
+          <div class="exp-results" id="results">
+            <div class="empty-state">
+              <p class="empty-title">No experiment yet.</p>
+              <p>Try: freeze the default city, open a <b>vachanalay</b> at <i>Ferry Landing</i> on the river, and run. Then try the same with a café. The model has opinions you may not expect.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="sec" id="notes" aria-labelledby="h-notes">
+        <div class="sec-head">
+          <span class="num" aria-hidden="true">04</span>
+          <div>
+            <h2 id="h-notes">Field notes</h2>
+            <p class="sec-dek">Written by rules, not by a language model: each sentence is a template chosen by an explicit threshold, so every claim traces back to a number.</p>
+          </div>
+        </div>
+        <div class="notes-grid">
+          <article class="field-notes" id="fieldNotes"></article>
+          <aside class="notebook">
+            <h3>Notebook <small>· saved in this browser</small></h3>
+            <div class="nb-actions">
+              <button id="saveExp" class="btn" disabled>Save last experiment</button>
+              <button id="exportCsv" class="btn btn-ghost">Export ledger CSV</button>
+              <button id="exportJson" class="btn btn-ghost" disabled>Export experiment JSON</button>
+            </div>
+            <ol id="notebook" class="nb-list"></ol>
+          </aside>
+        </div>
+      </section>
+
+      <section class="sec" id="method" aria-labelledby="h-method">
+        <div class="sec-head">
+          <span class="num" aria-hidden="true">05</span>
+          <div>
+            <h2 id="h-method">Method</h2>
+            <p class="sec-dek">Everything the city does, in one page.</p>
+          </div>
+        </div>
+        <div class="method">
+          <div>
+            <h3>Residents</h3>
+            <p>A population of synthetic residents (default 360), 40% newcomers. Each has a home near one of six fictional neighbourhoods; by default most live on their cohort's side of the river (<i>mixed housing</i> 0.35). Budgets and sociability are drawn from the <b>same</b> distributions for both cohorts, so differences you see come from taste, geography and feedback, not from built-in inequality.</p>
+            <h3>Choosing an evening</h3>
+            <p>A resident goes out with probability equal to their sociability (×0.7 in rain), then picks among open places and home by a multinomial logit, <code>P(j) ∝ exp(U<sub>j</sub>/T)</code>, with</p>
+            <pre class="eq">U = 2.2·appeal(type, cohort)
+  − β<sub>dist</sub>·3·distance/diagonal
+  − β<sub>price</sub>·cost·(1.2 − budget)
+  + β<sub>habit</sub>·0.6·ln(1 + habit)
+  + β<sub>homophily</sub>·2·(share of own cohort yesterday − ½)
+  − β<sub>crowd</sub>·max(0, load/capacity − 1)
+  − 2.5·[rain ∧ outdoor]
+U<sub>home</sub> = 0.4</pre>
+            <p>Cohort tastes (<code>appeal</code>) are explicit assumptions in <code>src/lib/model.ts</code>: settled residents lean to the tapri, newcomers to the café, both like the ghat and reading room.</p>
+          </div>
+          <div>
+            <h3>Conversations and ties</h3>
+            <p>Inside a place each visitor starts a few conversations (tapri and café 3, ghat 2, reading room and cinema 1) with someone present, drawn at random with a mild pull toward people they already know. Each conversation adds 1 to a symmetric tie; ties fade by the decay rate every evening and vanish below 0.1. A tie of 2.5 or more counts as <b>strong</b>.</p>
+            <h3>Measures</h3>
+            <ul class="defs">
+              <li><b>Belonging</b>: per resident <code>1 − exp(−Σ v²/(v²+4) / 5)</code>, averaged.</li>
+              <li><b>Bridging ties</b>: share of strong ties that cross cohorts.</li>
+              <li><b>Mixing ratio</b>: bridging ÷ its value if ties ignored cohort (2pq·n/(n−1)).</li>
+              <li><b>Isolation</b>: share with no strong tie.</li>
+              <li><b>Place segregation</b>: Duncan dissimilarity of the cohorts across places tonight.</li>
+              <li><b>Evenings out</b>: share of residents out tonight.</li>
+            </ul>
+            <h3>Experiments</h3>
+            <p>A and B run on the same seeds (common random numbers). Each world is summarised by its last ten evenings. Intervals for A and B are t-intervals; the difference uses a paired bootstrap (2,000 resamples); effect size is paired Cohen's d.</p>
+            <p class="caveat">This is a toy. No parameter is calibrated to any real city, neighbourhood or community, and no result here is a finding about real people.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <p>Original work by Shriya Shekatkar · SHRIYA.EXE · Synthetic or demo data is labeled as such. Not affiliated with any film, studio or company.</p>
+      <p><a href="https://shriyashekatkar25-byte.github.io/shriya-exe/">Studio archive ↗</a> · <a href="https://github.com/shriyashekatkar25-byte/katta-lab">Source on GitHub ↗</a></p>
+    </footer>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
